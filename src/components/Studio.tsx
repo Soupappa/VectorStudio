@@ -12,7 +12,11 @@ import { changeSvgColor } from '../utils/svgColor';
 
 type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'projects' | 'settings' | null;
 
-export default function Studio() {
+interface StudioProps {
+  onBackToHome?: () => void;
+}
+
+export default function Studio({ onBackToHome }: StudioProps) {
   const [activePanel, setActivePanel] = useState<PanelMode>(null);
   const [canvasElements, setCanvasElements] = useState<CanvasElement[]>([]);
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
@@ -224,7 +228,12 @@ export default function Studio() {
         <div className="w-12 flex items-center"></div>
         <>
         <div className="flex items-center gap-6">
-          <span className="font-bold text-lg text-slate-900">Vector Studio</span>
+          <button
+            onClick={onBackToHome}
+            className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
+          >
+            Vector Studio
+          </button>
 
           <nav className="flex items-center gap-1">
             <ModeButton
