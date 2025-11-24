@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Layers, Wand2, Box, Sparkles, Library, FolderOpen, Settings, SlidersHorizontal, Type, ZoomIn, ZoomOut, Download, Grid3x3, BookMarked } from 'lucide-react';
+import { useState } from 'react';
+import { Layers, Wand2, Box, Sparkles, Library, FolderOpen, Settings, SlidersHorizontal, Type, ZoomIn, ZoomOut, Download } from 'lucide-react';
 import Canvas from './Canvas';
 import DrawingsPanel from './DrawingsPanel';
 import PathsPanel from './PathsPanel';
@@ -9,9 +9,8 @@ import ProjectsPanel from './ProjectsPanel';
 import PropertiesPanel from './PropertiesPanel';
 import { CanvasElement } from '../types';
 import { changeSvgColor } from '../utils/svgColor';
-import { performBooleanOperation, BooleanOperation } from '../utils/pathBoolean';
 
-type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'projects' | 'settings' | 'collections' | null;
+type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'projects' | 'settings' | null;
 
 interface StudioProps {
   onBackToHome?: () => void;
@@ -24,51 +23,6 @@ export default function Studio({ onBackToHome }: StudioProps) {
   const [showBbox, setShowBbox] = useState(false);
   const [cleanMode, setCleanMode] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [showGrid, setShowGrid] = useState(false);
-  const [bboxOffsetX, setBboxOffsetX] = useState(0);
-  const [bboxOffsetY, setBboxOffsetY] = useState(0);
-  const [bboxScaleX, setBboxScaleX] = useState(1);
-  const [bboxScaleY, setBboxScaleY] = useState(1);
-  const [history, setHistory] = useState<CanvasElement[][]>([[]]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-
-  const saveToHistory = (newElements: CanvasElement[]) => {
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(JSON.parse(JSON.stringify(newElements)));
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  };
-
-  const undo = () => {
-    if (historyIndex > 0) {
-      const newIndex = historyIndex - 1;
-      setHistoryIndex(newIndex);
-      setCanvasElements(JSON.parse(JSON.stringify(history[newIndex])));
-    }
-  };
-
-  const redo = () => {
-    if (historyIndex < history.length - 1) {
-      const newIndex = historyIndex + 1;
-      setHistoryIndex(newIndex);
-      setCanvasElements(JSON.parse(JSON.stringify(history[newIndex])));
-    }
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        redo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        undo();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [historyIndex, history]);
 
   const togglePanel = (panel: PanelMode) => {
     setActivePanel(activePanel === panel ? null : panel);
@@ -89,54 +43,38 @@ export default function Studio({ onBackToHome }: StudioProps) {
       flipX: false,
       flipY: false,
     };
-    const newElements = [...canvasElements, newElement];
-    setCanvasElements(newElements);
-    saveToHistory(newElements);
+    setCanvasElements([...canvasElements, newElement]);
     setSelectedElementIds([newElement.id]);
   };
 
   const updateElement = (id: string, updates: Partial<CanvasElement>) => {
-    setCanvasElements(prevElements => {
-      const newElements = prevElements.map((el) => (el.id === id ? { ...el, ...updates } : el));
-      saveToHistory(newElements);
-      return newElements;
-    });
+    setCanvasElements(prevElements => prevElements.map((el) => (el.id === id ? { ...el, ...updates } : el)));
   };
 
   const deleteElements = (ids: string[]) => {
-    setCanvasElements(prevElements => {
-      const newElements = prevElements.filter((el) => !ids.includes(el.id));
-      saveToHistory(newElements);
-      return newElements;
-    });
+    setCanvasElements(prevElements => prevElements.filter((el) => !ids.includes(el.id)));
     setSelectedElementIds([]);
   };
 
   const duplicateElements = (ids: string[]) => {
     const elementsToDuplicate = canvasElements.filter((el) => ids.includes(el.id));
-    const duplicated = elementsToDuplicate.map((el) => ({
+    const newElements = elementsToDuplicate.map((el) => ({
       ...el,
       id: Date.now().toString() + Math.random(),
       x: el.x + 50,
       y: el.y + 50,
     }));
-    const newElements = [...canvasElements, ...duplicated];
-    setCanvasElements(newElements);
-    saveToHistory(newElements);
-    setSelectedElementIds(duplicated.map((el) => el.id));
+    setCanvasElements([...canvasElements, ...newElements]);
+    setSelectedElementIds(newElements.map((el) => el.id));
   };
 
   const groupElements = (ids: string[]) => {
     if (ids.length < 2) return;
 
     const groupId = `group_${Date.now()}`;
-    setCanvasElements(prevElements => {
-      const newElements = prevElements.map(el =>
-        ids.includes(el.id) ? { ...el, groupId } : el
-      );
-      saveToHistory(newElements);
-      return newElements;
-    });
+    setCanvasElements(prevElements => prevElements.map(el =>
+      ids.includes(el.id) ? { ...el, groupId } : el
+    ));
     setSelectedElementIds(ids);
   };
 
@@ -147,11 +85,9 @@ export default function Studio({ onBackToHome }: StudioProps) {
           .filter(el => ids.includes(el.id) && el.groupId)
           .map(el => el.groupId!)
       );
-      const newElements = prevElements.map(el =>
+      return prevElements.map(el =>
         el.groupId && groupIds.has(el.groupId) ? { ...el, groupId: undefined } : el
       );
-      saveToHistory(newElements);
-      return newElements;
     });
   };
 
@@ -199,9 +135,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
       }
     }
 
-    const allElements = [...canvasElements, ...newElements];
-    setCanvasElements(allElements);
-    saveToHistory(allElements);
+    setCanvasElements([...canvasElements, ...newElements]);
     setSelectedElementIds(newElements.map((el) => el.id));
   };
 
@@ -210,11 +144,10 @@ export default function Studio({ onBackToHome }: StudioProps) {
     const elementsToMove = reorderedElements.filter(el => ids.includes(el.id));
     const otherElements = reorderedElements.filter(el => !ids.includes(el.id));
 
-    let newElements: CanvasElement[];
     if (direction === 'front') {
-      newElements = [...otherElements, ...elementsToMove];
+      setCanvasElements([...otherElements, ...elementsToMove]);
     } else if (direction === 'back') {
-      newElements = [...elementsToMove, ...otherElements];
+      setCanvasElements([...elementsToMove, ...otherElements]);
     } else if (direction === 'forward') {
       elementsToMove.forEach(elToMove => {
         const currentIndex = reorderedElements.findIndex(el => el.id === elToMove.id);
@@ -224,8 +157,8 @@ export default function Studio({ onBackToHome }: StudioProps) {
           reorderedElements[currentIndex] = temp;
         }
       });
-      newElements = reorderedElements;
-    } else {
+      setCanvasElements(reorderedElements);
+    } else if (direction === 'backward') {
       elementsToMove.reverse().forEach(elToMove => {
         const currentIndex = reorderedElements.findIndex(el => el.id === elToMove.id);
         if (currentIndex > 0) {
@@ -234,10 +167,8 @@ export default function Studio({ onBackToHome }: StudioProps) {
           reorderedElements[currentIndex] = temp;
         }
       });
-      newElements = reorderedElements;
+      setCanvasElements(reorderedElements);
     }
-    setCanvasElements(newElements);
-    saveToHistory(newElements);
   };
 
   const handleSelectElements = (ids: string[], isShiftKey: boolean) => {
@@ -246,48 +177,6 @@ export default function Studio({ onBackToHome }: StudioProps) {
       setSelectedElementIds(newSelection);
     } else {
       setSelectedElementIds(ids);
-    }
-  };
-
-  const handleBooleanOperation = (operation: BooleanOperation) => {
-    if (selectedElementIds.length !== 2) {
-      alert('Please select exactly 2 elements for boolean operations');
-      return;
-    }
-
-    const element1 = canvasElements.find(el => el.id === selectedElementIds[0]);
-    const element2 = canvasElements.find(el => el.id === selectedElementIds[1]);
-
-    if (!element1 || !element2) return;
-
-    const result = performBooleanOperation(element1.svg, element2.svg, operation);
-
-    if (result.success && result.svg) {
-      const newElement: CanvasElement = {
-        id: Date.now().toString() + Math.random(),
-        name: `${operation}-${Date.now()}`,
-        svg: result.svg,
-        x: element1.x,
-        y: element1.y,
-        scale: element1.scale,
-        scaleX: element1.scaleX,
-        scaleY: element1.scaleY,
-        rotation: element1.rotation,
-        opacity: element1.opacity,
-        flipX: false,
-        flipY: false,
-        color: element1.color,
-      };
-
-      const newElements = [
-        ...canvasElements.filter(el => !selectedElementIds.includes(el.id)),
-        newElement,
-      ];
-      setCanvasElements(newElements);
-      saveToHistory(newElements);
-      setSelectedElementIds([newElement.id]);
-    } else {
-      alert(`Boolean operation failed: ${result.error || 'Unknown error'}`);
     }
   };
 
@@ -327,12 +216,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
   return (
     <div className="h-screen flex flex-col bg-slate-50">
       <button
-        onClick={() => {
-          setCleanMode(!cleanMode);
-          if (!cleanMode) {
-            setShowBbox(false);
-          }
-        }}
+        onClick={() => setCleanMode(!cleanMode)}
         className="absolute top-3 left-6 z-50 p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-lg"
         title={cleanMode ? 'Show UI' : 'Clean Mode (Hide UI for screenshots)'}
       >
@@ -340,17 +224,17 @@ export default function Studio({ onBackToHome }: StudioProps) {
       </button>
 
       {!cleanMode && (
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center z-20">
-        <div className="flex items-center gap-6" style={{ width: '384px' }}>
+        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-20">
+        <div className="w-12 flex items-center"></div>
+        <>
+        <div className="flex items-center gap-6">
           <button
             onClick={onBackToHome}
-            className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer mx-auto"
+            className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
           >
             Vector Studio
           </button>
-        </div>
 
-        <div className="flex-1 flex items-center justify-between">
           <nav className="flex items-center gap-1">
             <ModeButton
               icon={<Box className="w-4 h-4" />}
@@ -383,12 +267,6 @@ export default function Studio({ onBackToHome }: StudioProps) {
               onClick={() => togglePanel('library')}
             />
             <ModeButton
-              icon={<BookMarked className="w-4 h-4" />}
-              label="Collections"
-              active={activePanel === 'collections'}
-              onClick={() => togglePanel('collections')}
-            />
-            <ModeButton
               icon={<FolderOpen className="w-4 h-4" />}
               label="Projects"
               active={activePanel === 'projects'}
@@ -401,19 +279,9 @@ export default function Studio({ onBackToHome }: StudioProps) {
               onClick={() => togglePanel('settings')}
             />
           </nav>
+        </div>
 
-          <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowGrid(!showGrid)}
-            className={`p-2 border rounded-lg transition-colors shadow-sm ${
-              showGrid
-                ? 'bg-slate-900 text-white border-slate-900'
-                : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-700'
-            }`}
-            title="Toggle Grid"
-          >
-            <Grid3x3 className="w-4 h-4" />
-          </button>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setZoom(Math.min(zoom + 0.2, 3))}
             className="p-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
@@ -440,9 +308,9 @@ export default function Studio({ onBackToHome }: StudioProps) {
             <Download className="w-4 h-4 text-slate-700" />
             Export
           </button>
-          </div>
         </div>
-        </header>
+        </>
+      </header>
       )}
 
       <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -482,13 +350,6 @@ export default function Studio({ onBackToHome }: StudioProps) {
             />
           )}
 
-          {!cleanMode && activePanel === 'collections' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <BookMarked className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Collections coming soon</p>
-            </div>
-          )}
-
           {!cleanMode && activePanel === 'projects' && (
             <ProjectsPanel
               onClose={() => setActivePanel(null)}
@@ -525,13 +386,12 @@ export default function Studio({ onBackToHome }: StudioProps) {
               zoom={zoom}
               onExport={exportSvg}
               onZoomChange={setZoom}
-              showGrid={showGrid}
             />
           </div>
         </div>
 
         {!cleanMode && selectedElementIds.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 shadow-lg z-30">
+          <div className="h-16 bg-white border-t border-slate-200 shadow-lg">
             <PropertiesPanel
               elements={canvasElements}
               selectedElementIds={selectedElementIds}
@@ -543,17 +403,8 @@ export default function Studio({ onBackToHome }: StudioProps) {
               onUngroup={ungroupElements}
               onArrayDuplicate={arrayDuplicateElements}
               onReorder={reorderElements}
-              onBooleanOperation={handleBooleanOperation}
               showBbox={showBbox}
               onToggleBbox={(value) => setShowBbox(value)}
-              bboxOffsetX={bboxOffsetX}
-              bboxOffsetY={bboxOffsetY}
-              bboxScaleX={bboxScaleX}
-              bboxScaleY={bboxScaleY}
-              onBboxOffsetXChange={setBboxOffsetX}
-              onBboxOffsetYChange={setBboxOffsetY}
-              onBboxScaleXChange={setBboxScaleX}
-              onBboxScaleYChange={setBboxScaleY}
             />
           </div>
         )}
