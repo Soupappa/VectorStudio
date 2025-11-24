@@ -1,10 +1,10 @@
 import { Sparkles, Layers, Zap, Download, Move, Palette } from 'lucide-react';
 
 interface LandingPageProps {
-  onGetStarted: () => void;
+  onEnterStudio: () => void;
 }
 
-export default function LandingPage({ onGetStarted }: LandingPageProps) {
+export default function LandingPage({ onEnterStudio }: LandingPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
@@ -16,7 +16,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <span className="text-xl font-bold text-slate-900">Vector Studio</span>
           </div>
           <button
-            onClick={onGetStarted}
+            onClick={onEnterStudio}
             className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-colors"
           >
             Launch Studio
@@ -46,7 +46,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
             <div className="flex items-center justify-center gap-4">
               <button
-                onClick={onGetStarted}
+                onClick={onEnterStudio}
                 className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold text-lg hover:bg-slate-800 transition-all hover:scale-105"
               >
                 Get Started Free
@@ -136,7 +136,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               Download clean SVG files ready for web, print, or further editing in any vector software
             </p>
             <button
-              onClick={onGetStarted}
+              onClick={onEnterStudio}
               className="px-8 py-4 bg-white text-slate-900 rounded-xl font-semibold text-lg hover:bg-slate-100 transition-colors"
             >
               Start Creating Now

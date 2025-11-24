@@ -14,6 +14,7 @@ interface CanvasProps {
   zoom: number;
   onExport: () => void;
   onZoomChange: (zoom: number) => void;
+  showGrid?: boolean;
 }
 
 type DragMode = 'move' | 'resize-nw' | 'resize-ne' | 'resize-sw' | 'resize-se' | 'rotate' | 'select-rect' | null;
@@ -30,6 +31,7 @@ export default function Canvas({
   zoom,
   onExport,
   onZoomChange,
+  showGrid = false,
 }: CanvasProps) {
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
@@ -324,12 +326,12 @@ export default function Canvas({
       onWheel={handleWheel}
     >
       {showBbox && bbox && selectedElements.length === 1 && (
-        <div className="absolute bottom-4 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2">
+        <div className="absolute bottom-20 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2 w-64">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold text-slate-700">BBox Debug</span>
+            <span className="text-xs font-semibold text-slate-700">Viewbox</span>
             <button
               onClick={() => setEditBoxMode(!editBoxMode)}
-              className={`text-xs px-2 py-1 rounded ${editBoxMode ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700'}`}
+              className={`text-xs px-2 py-1 rounded ${editBoxMode ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}
             >
               {editBoxMode ? 'Edit ON' : 'Edit OFF'}
             </button>
@@ -337,60 +339,94 @@ export default function Canvas({
 
           {editBoxMode && (
             <>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 w-16">Offset X:</span>
-                <input
-                  type="range"
-                  min="-200"
-                  max="200"
-                  step="1"
-                  value={bboxOffsetX}
-                  onChange={(e) => setBboxOffsetX(Number(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-xs font-mono text-slate-900 w-12">{bboxOffsetX}</span>
+              <div className="space-y-2">
+                <div className="text-xs font-semibold text-slate-700 mb-1">Viewbox Adjustments</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Offset X:</span>
+                  <input
+                    type="range"
+                    min="-200"
+                    max="200"
+                    step="1"
+                    value={bboxOffsetX}
+                    onChange={(e) => setBboxOffsetX(Number(e.target.value))}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{bboxOffsetX}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Offset Y:</span>
+                  <input
+                    type="range"
+                    min="-200"
+                    max="200"
+                    step="1"
+                    value={bboxOffsetY}
+                    onChange={(e) => setBboxOffsetY(Number(e.target.value))}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{bboxOffsetY}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Scale X:</span>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.05"
+                    value={bboxScaleX}
+                    onChange={(e) => setBboxScaleX(Number(e.target.value))}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{bboxScaleX.toFixed(2)}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Scale Y:</span>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.05"
+                    value={bboxScaleY}
+                    onChange={(e) => setBboxScaleY(Number(e.target.value))}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{bboxScaleY.toFixed(2)}</span>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 w-16">Offset Y:</span>
-                <input
-                  type="range"
-                  min="-200"
-                  max="200"
-                  step="1"
-                  value={bboxOffsetY}
-                  onChange={(e) => setBboxOffsetY(Number(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-xs font-mono text-slate-900 w-12">{bboxOffsetY}</span>
-              </div>
+              <div className="pt-2 border-t border-slate-200 space-y-2">
+                <div className="text-xs font-semibold text-slate-700 mb-1">Object Position</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">X:</span>
+                  <input
+                    type="range"
+                    min="-2000"
+                    max="2000"
+                    step="1"
+                    value={selectedElements[0].x}
+                    onChange={(e) => onUpdateElement(selectedElements[0].id, { x: Number(e.target.value) })}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{Math.round(selectedElements[0].x)}</span>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 w-16">Scale X:</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.05"
-                  value={bboxScaleX}
-                  onChange={(e) => setBboxScaleX(Number(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-xs font-mono text-slate-900 w-12">{bboxScaleX.toFixed(2)}</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 w-16">Scale Y:</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.05"
-                  value={bboxScaleY}
-                  onChange={(e) => setBboxScaleY(Number(e.target.value))}
-                  className="w-24"
-                />
-                <span className="text-xs font-mono text-slate-900 w-12">{bboxScaleY.toFixed(2)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Y:</span>
+                  <input
+                    type="range"
+                    min="-2000"
+                    max="2000"
+                    step="1"
+                    value={selectedElements[0].y}
+                    onChange={(e) => onUpdateElement(selectedElements[0].id, { y: Number(e.target.value) })}
+                    className="flex-1 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-900"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-10 text-right">{Math.round(selectedElements[0].y)}</span>
+                </div>
               </div>
 
               <button
@@ -400,28 +436,10 @@ export default function Canvas({
                   setBboxScaleX(1);
                   setBboxScaleY(1);
                 }}
-                className="text-xs px-2 py-1 bg-slate-100 rounded hover:bg-slate-200 w-full"
+                className="text-xs px-2 py-1 bg-slate-100 rounded hover:bg-slate-200 w-full mt-2"
               >
-                Reset
+                Reset Viewbox
               </button>
-
-              <div className="pt-2 border-t border-slate-200 space-y-1">
-                <div className="text-xs text-slate-700">
-                  <strong>Current values:</strong>
-                </div>
-                <div className="text-xs font-mono text-blue-600">
-                  offsetX: {bboxOffsetX}
-                </div>
-                <div className="text-xs font-mono text-blue-600">
-                  offsetY: {bboxOffsetY}
-                </div>
-                <div className="text-xs font-mono text-blue-600">
-                  scaleX: {bboxScaleX.toFixed(2)}
-                </div>
-                <div className="text-xs font-mono text-blue-600">
-                  scaleY: {bboxScaleY.toFixed(2)}
-                </div>
-              </div>
             </>
           )}
         </div>
@@ -610,8 +628,108 @@ export default function Canvas({
                 pointerEvents="none"
               />
             )}
+
+            {showGrid && !cleanMode && (
+              <g pointerEvents="none">
+                <defs>
+                  <pattern
+                    id="grid-pattern"
+                    width={100 * zoom}
+                    height={100 * zoom}
+                    patternUnits="userSpaceOnUse"
+                    x={panX}
+                    y={panY}
+                  >
+                    <path
+                      d={`M ${100 * zoom} 0 L 0 0 0 ${100 * zoom}`}
+                      fill="none"
+                      stroke="#ec4899"
+                      strokeWidth="2"
+                      opacity="0.6"
+                    />
+                  </pattern>
+                </defs>
+                <rect
+                  x="-10000"
+                  y="-10000"
+                  width="20000"
+                  height="20000"
+                  fill="url(#grid-pattern)"
+                />
+              </g>
+            )}
           </g>
         </svg>
+
+        {showGrid && !cleanMode && (
+          <>
+            <div className="absolute top-0 left-8 right-0 h-8 bg-slate-50 border-b border-pink-400 flex items-center overflow-hidden pointer-events-none">
+              <svg width="100%" height="32">
+                {Array.from({ length: 100 }, (_, i) => {
+                  const x = (i * 100 * zoom) + panX;
+                  if (x < 0 || x > (containerRef.current?.clientWidth || 0)) return null;
+                  const isMajor = i % 5 === 0;
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={x}
+                        y1={isMajor ? 20 : 24}
+                        x2={x}
+                        y2={32}
+                        stroke="#ec4899"
+                        strokeWidth={isMajor ? 2 : 1}
+                      />
+                      {isMajor && (
+                        <text
+                          x={x + 4}
+                          y={16}
+                          fontSize="10"
+                          fill="#ec4899"
+                          fontFamily="monospace"
+                        >
+                          {i * 100}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+            <div className="absolute top-8 left-0 bottom-0 w-8 bg-slate-50 border-r border-pink-400 flex flex-col overflow-hidden pointer-events-none">
+              <svg width="32" height="100%">
+                {Array.from({ length: 100 }, (_, i) => {
+                  const y = (i * 100 * zoom) + panY;
+                  if (y < 0 || y > (containerRef.current?.clientHeight || 0)) return null;
+                  const isMajor = i % 5 === 0;
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={isMajor ? 20 : 24}
+                        y1={y}
+                        x2={32}
+                        y2={y}
+                        stroke="#ec4899"
+                        strokeWidth={isMajor ? 2 : 1}
+                      />
+                      {isMajor && (
+                        <text
+                          x={4}
+                          y={y - 4}
+                          fontSize="10"
+                          fill="#ec4899"
+                          fontFamily="monospace"
+                          writingMode="tb"
+                        >
+                          {i * 100}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+          </>
+        )}
       </div>
 
       {elements.length === 0 && (
