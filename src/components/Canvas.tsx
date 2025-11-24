@@ -324,7 +324,7 @@ export default function Canvas({
       onWheel={handleWheel}
     >
       {showBbox && bbox && selectedElements.length === 1 && (
-        <div className="absolute bottom-20 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2">
+        <div className="absolute bottom-4 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-semibold text-slate-700">BBox Debug</span>
             <button
