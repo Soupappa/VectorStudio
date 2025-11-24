@@ -12,11 +12,7 @@ import { changeSvgColor } from '../utils/svgColor';
 
 type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'projects' | 'settings' | null;
 
-interface StudioProps {
-  onBackToHome?: () => void;
-}
-
-export default function Studio({ onBackToHome }: StudioProps) {
+export default function Studio() {
   const [activePanel, setActivePanel] = useState<PanelMode>(null);
   const [canvasElements, setCanvasElements] = useState<CanvasElement[]>([]);
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
@@ -228,12 +224,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
         <div className="w-12 flex items-center"></div>
         <>
         <div className="flex items-center gap-6">
-          <button
-            onClick={onBackToHome}
-            className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
-          >
-            Vector Studio
-          </button>
+          <span className="font-bold text-lg text-slate-900">Vector Studio</span>
 
           <nav className="flex items-center gap-1">
             <ModeButton
@@ -313,85 +304,83 @@ export default function Studio({ onBackToHome }: StudioProps) {
       </header>
       )}
 
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="flex-1 flex overflow-hidden">
-          {!cleanMode && activePanel === 'drawings' && (
-            <DrawingsPanel
-              onClose={() => setActivePanel(null)}
-              onAddToCanvas={addToCanvas}
-            />
-          )}
+      <div className="flex-1 flex overflow-hidden relative">
+        {!cleanMode && activePanel === 'drawings' && (
+          <DrawingsPanel
+            onClose={() => setActivePanel(null)}
+            onAddToCanvas={addToCanvas}
+          />
+        )}
 
-          {!cleanMode && activePanel === 'paths' && (
-            <PathsPanel
-              onClose={() => setActivePanel(null)}
-              onAddToCanvas={addToCanvas}
-            />
-          )}
+        {!cleanMode && activePanel === 'paths' && (
+          <PathsPanel
+            onClose={() => setActivePanel(null)}
+            onAddToCanvas={addToCanvas}
+          />
+        )}
 
-          {!cleanMode && activePanel === 'text' && (
-            <TextPanel
-              onClose={() => setActivePanel(null)}
-              onAddToCanvas={addToCanvas}
-            />
-          )}
+        {!cleanMode && activePanel === 'text' && (
+          <TextPanel
+            onClose={() => setActivePanel(null)}
+            onAddToCanvas={addToCanvas}
+          />
+        )}
 
-          {!cleanMode && activePanel === 'motion' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <Sparkles className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Motion mode coming soon</p>
-            </div>
-          )}
-
-          {!cleanMode && activePanel === 'library' && (
-            <LibraryPanel
-              onClose={() => setActivePanel(null)}
-              onAddToCanvas={addToCanvas}
-            />
-          )}
-
-          {!cleanMode && activePanel === 'projects' && (
-            <ProjectsPanel
-              onClose={() => setActivePanel(null)}
-              canvasElements={canvasElements}
-              onLoadProject={setCanvasElements}
-            />
-          )}
-
-          {!cleanMode && activePanel === 'settings' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <Settings className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Settings coming soon</p>
-            </div>
-          )}
-
-          <div className="flex-1 relative">
-            <Canvas
-              elements={canvasElements}
-              selectedElementIds={selectedElementIds}
-              onSelectElements={handleSelectElements}
-              onUpdateElement={updateElement}
-              onUpdateElements={(updates) => {
-                setCanvasElements(prevElements => {
-                  const updateMap = new Map(updates.map(u => [u.id, u]));
-                  return prevElements.map(el => {
-                    const update = updateMap.get(el.id);
-                    return update ? { ...el, ...update } : el;
-                  });
-                });
-              }}
-              showBbox={showBbox}
-              cleanMode={cleanMode}
-              onToggleCleanMode={() => setCleanMode(!cleanMode)}
-              zoom={zoom}
-              onExport={exportSvg}
-              onZoomChange={setZoom}
-            />
+        {!cleanMode && activePanel === 'motion' && (
+          <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+            <Sparkles className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500">Motion mode coming soon</p>
           </div>
+        )}
+
+        {!cleanMode && activePanel === 'library' && (
+          <LibraryPanel
+            onClose={() => setActivePanel(null)}
+            onAddToCanvas={addToCanvas}
+          />
+        )}
+
+        {!cleanMode && activePanel === 'projects' && (
+          <ProjectsPanel
+            onClose={() => setActivePanel(null)}
+            canvasElements={canvasElements}
+            onLoadProject={setCanvasElements}
+          />
+        )}
+
+        {!cleanMode && activePanel === 'settings' && (
+          <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+            <Settings className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500">Settings coming soon</p>
+          </div>
+        )}
+
+        <div className="flex-1 relative">
+          <Canvas
+            elements={canvasElements}
+            selectedElementIds={selectedElementIds}
+            onSelectElements={handleSelectElements}
+            onUpdateElement={updateElement}
+            onUpdateElements={(updates) => {
+              setCanvasElements(prevElements => {
+                const updateMap = new Map(updates.map(u => [u.id, u]));
+                return prevElements.map(el => {
+                  const update = updateMap.get(el.id);
+                  return update ? { ...el, ...update } : el;
+                });
+              });
+            }}
+            showBbox={showBbox}
+            cleanMode={cleanMode}
+            onToggleCleanMode={() => setCleanMode(!cleanMode)}
+            zoom={zoom}
+            onExport={exportSvg}
+            onZoomChange={setZoom}
+          />
         </div>
 
         {!cleanMode && selectedElementIds.length > 0 && (
-          <div className="h-16 bg-white border-t border-slate-200 shadow-lg">
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 shadow-lg z-30">
             <PropertiesPanel
               elements={canvasElements}
               selectedElementIds={selectedElementIds}
