@@ -12,6 +12,7 @@ interface CanvasProps {
   cleanMode: boolean;
   onToggleCleanMode: () => void;
   zoom: number;
+  showGrid: boolean;
   onExport: () => void;
   onZoomChange: (zoom: number) => void;
 }
@@ -28,6 +29,7 @@ export default function Canvas({
   cleanMode,
   onToggleCleanMode,
   zoom,
+  showGrid,
   onExport,
   onZoomChange,
 }: CanvasProps) {
@@ -323,10 +325,10 @@ export default function Canvas({
       className="h-full relative bg-slate-200 overflow-hidden"
       onWheel={handleWheel}
     >
-      {showBbox && bbox && selectedElements.length === 1 && (
+      {showBbox && bbox && selectedElements.length === 1 && !cleanMode && (
         <div className="absolute bottom-4 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs font-semibold text-slate-700">BBox Debug</span>
+            <span className="text-xs font-semibold text-slate-700">BBox Tuning</span>
             <button
               onClick={() => setEditBoxMode(!editBoxMode)}
               className={`text-xs px-2 py-1 rounded ${editBoxMode ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-700'}`}
@@ -393,6 +395,37 @@ export default function Canvas({
                 <span className="text-xs font-mono text-slate-900 w-12">{bboxScaleY.toFixed(2)}</span>
               </div>
 
+              <div className="pt-2 border-t border-slate-200 space-y-2">
+                <div className="text-xs text-slate-700 font-semibold">Object Position</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">X:</span>
+                  <input
+                    type="range"
+                    min="-2000"
+                    max="2000"
+                    step="10"
+                    value={selectedElements[0].x}
+                    onChange={(e) => onUpdateElement(selectedElements[0].id, { x: Number(e.target.value) })}
+                    className="w-24"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-12">{Math.round(selectedElements[0].x)}</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-600 w-16">Y:</span>
+                  <input
+                    type="range"
+                    min="-2000"
+                    max="2000"
+                    step="10"
+                    value={selectedElements[0].y}
+                    onChange={(e) => onUpdateElement(selectedElements[0].id, { y: Number(e.target.value) })}
+                    className="w-24"
+                  />
+                  <span className="text-xs font-mono text-slate-900 w-12">{Math.round(selectedElements[0].y)}</span>
+                </div>
+              </div>
+
               <button
                 onClick={() => {
                   setBboxOffsetX(0);
@@ -409,16 +442,16 @@ export default function Canvas({
                 <div className="text-xs text-slate-700">
                   <strong>Current values:</strong>
                 </div>
-                <div className="text-xs font-mono text-blue-600">
+                <div className="text-xs font-mono text-slate-900">
                   offsetX: {bboxOffsetX}
                 </div>
-                <div className="text-xs font-mono text-blue-600">
+                <div className="text-xs font-mono text-slate-900">
                   offsetY: {bboxOffsetY}
                 </div>
-                <div className="text-xs font-mono text-blue-600">
+                <div className="text-xs font-mono text-slate-900">
                   scaleX: {bboxScaleX.toFixed(2)}
                 </div>
-                <div className="text-xs font-mono text-blue-600">
+                <div className="text-xs font-mono text-slate-900">
                   scaleY: {bboxScaleY.toFixed(2)}
                 </div>
               </div>
@@ -447,8 +480,19 @@ export default function Canvas({
               <rect width="50" height="50" fill="#e5e7eb" />
               <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3,3" />
             </pattern>
+            <pattern id="magentaGrid" width={100 * zoom} height={100 * zoom} patternUnits="userSpaceOnUse">
+              <path
+                d={`M ${100 * zoom} 0 L 0 0 0 ${100 * zoom}`}
+                fill="none"
+                stroke="#e91e63"
+                strokeWidth={Math.max(1, zoom * 0.5)}
+              />
+            </pattern>
           </defs>
           <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#grid)" />
+          {showGrid && !cleanMode && (
+            <rect x="-10000" y="-10000" width="20000" height="20000" fill="url(#magentaGrid)" opacity="0.5" />
+          )}
           <g transform={`translate(${panX / zoom}, ${panY / zoom}) scale(${zoom})`}>
             {elements.map((element) => {
               const svg = element.color ? changeSvgColor(element.svg, element.color) : element.svg;

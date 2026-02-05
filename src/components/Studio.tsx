@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layers, Wand2, Box, Sparkles, Library, FolderOpen, Settings, SlidersHorizontal, Type, ZoomIn, ZoomOut, Download } from 'lucide-react';
+import { Layers, Wand2, Box, Sparkles, Library, FolderOpen, Settings, SlidersHorizontal, Type, ZoomIn, ZoomOut, Download, Grid3x3, BookOpen } from 'lucide-react';
 import Canvas from './Canvas';
 import DrawingsPanel from './DrawingsPanel';
 import PathsPanel from './PathsPanel';
@@ -10,7 +10,7 @@ import PropertiesPanel from './PropertiesPanel';
 import { CanvasElement } from '../types';
 import { changeSvgColor } from '../utils/svgColor';
 
-type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'projects' | 'settings' | null;
+type PanelMode = 'drawings' | 'paths' | 'text' | 'motion' | 'library' | 'collections' | 'projects' | 'settings' | null;
 
 interface StudioProps {
   onBackToHome?: () => void;
@@ -23,9 +23,21 @@ export default function Studio({ onBackToHome }: StudioProps) {
   const [showBbox, setShowBbox] = useState(false);
   const [cleanMode, setCleanMode] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [showGrid, setShowGrid] = useState(false);
+  const [savedPanelState, setSavedPanelState] = useState<PanelMode>(null);
 
   const togglePanel = (panel: PanelMode) => {
     setActivePanel(activePanel === panel ? null : panel);
+  };
+
+  const toggleCleanMode = () => {
+    if (!cleanMode) {
+      setSavedPanelState(activePanel);
+      setActivePanel(null);
+    } else {
+      setActivePanel(savedPanelState);
+    }
+    toggleCleanMode();
   };
 
   const addToCanvas = (svg: string, name: string) => {
@@ -216,7 +228,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
   return (
     <div className="h-screen flex flex-col bg-slate-50">
       <button
-        onClick={() => setCleanMode(!cleanMode)}
+        onClick={() => toggleCleanMode()}
         className="absolute top-3 left-6 z-50 p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shadow-lg"
         title={cleanMode ? 'Show UI' : 'Clean Mode (Hide UI for screenshots)'}
       >
@@ -227,7 +239,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
         <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-20">
         <div className="w-12 flex items-center"></div>
         <>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 ml-72">
           <button
             onClick={onBackToHome}
             className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
@@ -267,6 +279,12 @@ export default function Studio({ onBackToHome }: StudioProps) {
               onClick={() => togglePanel('library')}
             />
             <ModeButton
+              icon={<BookOpen className="w-4 h-4" />}
+              label="Collections"
+              active={activePanel === 'collections'}
+              onClick={() => togglePanel('collections')}
+            />
+            <ModeButton
               icon={<FolderOpen className="w-4 h-4" />}
               label="Projects"
               active={activePanel === 'projects'}
@@ -282,6 +300,17 @@ export default function Studio({ onBackToHome }: StudioProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGrid(!showGrid)}
+            className={`p-2 border rounded-lg transition-colors shadow-sm ${
+              showGrid
+                ? 'bg-slate-900 border-slate-900 text-white hover:bg-slate-800'
+                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+            }`}
+            title={showGrid ? 'Hide Grid' : 'Show Grid'}
+          >
+            <Grid3x3 className="w-4 h-4" />
+          </button>
           <button
             onClick={() => setZoom(Math.min(zoom + 0.2, 3))}
             className="p-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
@@ -350,6 +379,13 @@ export default function Studio({ onBackToHome }: StudioProps) {
             />
           )}
 
+          {!cleanMode && activePanel === 'collections' && (
+            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+              <BookOpen className="w-16 h-16 text-slate-300 mb-4" />
+              <p className="text-slate-500">Collections coming soon</p>
+            </div>
+          )}
+
           {!cleanMode && activePanel === 'projects' && (
             <ProjectsPanel
               onClose={() => setActivePanel(null)}
@@ -382,8 +418,9 @@ export default function Studio({ onBackToHome }: StudioProps) {
               }}
               showBbox={showBbox}
               cleanMode={cleanMode}
-              onToggleCleanMode={() => setCleanMode(!cleanMode)}
+              onToggleCleanMode={() => toggleCleanMode()}
               zoom={zoom}
+              showGrid={showGrid}
               onExport={exportSvg}
               onZoomChange={setZoom}
             />

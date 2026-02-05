@@ -12,7 +12,8 @@ svg text {
 }
 
 /* Custom Range Slider Styles */
-input[type="range"].tech-slider {
+input[type="range"].tech-slider,
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -20,51 +21,59 @@ input[type="range"].tech-slider {
   height: 20px;
 }
 
-/* Track */
-input[type="range"].tech-slider::-webkit-slider-track {
-  background: #000000;
+/* Track - Gray Rails */
+input[type="range"].tech-slider::-webkit-slider-track,
+input[type="range"]::-webkit-slider-track {
+  background: #cbd5e1;
   height: 3px;
   border-radius: 1.5px;
 }
 
-input[type="range"].tech-slider::-moz-range-track {
-  background: #000000;
+input[type="range"].tech-slider::-moz-range-track,
+input[type="range"]::-moz-range-track {
+  background: #cbd5e1;
   height: 3px;
   border-radius: 1.5px;
 }
 
-/* Thumb - Rectangle Shape */
-input[type="range"].tech-slider::-webkit-slider-thumb {
+/* Thumb - Black Round Buttons */
+input[type="range"].tech-slider::-webkit-slider-thumb,
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
   height: 14px;
-  border-radius: 2px;
-  background: #000000;
-  border: 1px solid #ffffff;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid #ffffff;
   margin-top: -6px;
   transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
-input[type="range"].tech-slider::-moz-range-thumb {
+input[type="range"].tech-slider::-moz-range-thumb,
+input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  border-radius: 2px;
-  background: #000000;
-  border: 1px solid #ffffff;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid #ffffff;
   transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
-input[type="range"].tech-slider::-webkit-slider-thumb:hover {
+input[type="range"].tech-slider::-webkit-slider-thumb:hover,
+input[type="range"]::-webkit-slider-thumb:hover {
   width: 16px;
   height: 16px;
   margin-top: -7px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-input[type="range"].tech-slider::-moz-range-thumb:hover {
+input[type="range"].tech-slider::-moz-range-thumb:hover,
+input[type="range"]::-moz-range-thumb:hover {
   width: 16px;
   height: 16px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);

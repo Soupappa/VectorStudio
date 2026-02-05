@@ -115,7 +115,7 @@ export default function LibraryPanel({
   const items = getCurrentItems();
 
   return (
-    <div className="w-80 bg-white border-r border-slate-200 shadow-xl flex flex-col z-10">
+    <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col z-10">
       <div className="p-4 border-b border-slate-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-slate-900">Library</h2>
