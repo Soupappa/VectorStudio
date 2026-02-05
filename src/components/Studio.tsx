@@ -236,17 +236,17 @@ export default function Studio({ onBackToHome }: StudioProps) {
       </button>
 
       {!cleanMode && (
-        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between z-20">
-        <div className="w-12 flex items-center"></div>
-        <>
-        <div className="flex items-center gap-6 ml-72">
+        <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center z-20">
+        <div className="flex items-center gap-6 absolute" style={{ left: '192px' }}>
           <button
             onClick={onBackToHome}
             className="font-bold text-lg text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
           >
             Vector Studio
           </button>
+        </div>
 
+        <div className="flex items-center absolute" style={{ left: '384px' }}>
           <nav className="flex items-center gap-1">
             <ModeButton
               icon={<Box className="w-4 h-4" />}
@@ -299,7 +299,7 @@ export default function Studio({ onBackToHome }: StudioProps) {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto">
           <button
             onClick={() => setShowGrid(!showGrid)}
             className={`p-2 border rounded-lg transition-colors shadow-sm ${
@@ -338,97 +338,107 @@ export default function Studio({ onBackToHome }: StudioProps) {
             Export
           </button>
         </div>
-        </>
       </header>
       )}
 
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <div className="flex-1 flex overflow-hidden">
-          {!cleanMode && activePanel === 'drawings' && (
+      <div className="flex-1 relative overflow-hidden">
+        {/* Canvas - Background Layer */}
+        <div className="absolute inset-0 z-0">
+          <Canvas
+            elements={canvasElements}
+            selectedElementIds={selectedElementIds}
+            onSelectElements={handleSelectElements}
+            onUpdateElement={updateElement}
+            onUpdateElements={(updates) => {
+              setCanvasElements(prevElements => {
+                const updateMap = new Map(updates.map(u => [u.id, u]));
+                return prevElements.map(el => {
+                  const update = updateMap.get(el.id);
+                  return update ? { ...el, ...update } : el;
+                });
+              });
+            }}
+            showBbox={showBbox}
+            cleanMode={cleanMode}
+            onToggleCleanMode={() => toggleCleanMode()}
+            zoom={zoom}
+            showGrid={showGrid}
+            onExport={exportSvg}
+            onZoomChange={setZoom}
+          />
+        </div>
+
+        {/* Panels - Overlay Layer */}
+        {!cleanMode && activePanel === 'drawings' && (
+          <div className="absolute top-0 left-0 bottom-0 z-10">
             <DrawingsPanel
               onClose={() => setActivePanel(null)}
               onAddToCanvas={addToCanvas}
             />
-          )}
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'paths' && (
+        {!cleanMode && activePanel === 'paths' && (
+          <div className="absolute top-0 left-0 bottom-0 z-10">
             <PathsPanel
               onClose={() => setActivePanel(null)}
               onAddToCanvas={addToCanvas}
             />
-          )}
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'text' && (
+        {!cleanMode && activePanel === 'text' && (
+          <div className="absolute top-0 left-0 bottom-0 z-10">
             <TextPanel
               onClose={() => setActivePanel(null)}
               onAddToCanvas={addToCanvas}
             />
-          )}
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'motion' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <Sparkles className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Motion mode coming soon</p>
-            </div>
-          )}
+        {!cleanMode && activePanel === 'motion' && (
+          <div className="absolute top-0 left-0 bottom-0 w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+            <Sparkles className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500">Motion mode coming soon</p>
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'library' && (
+        {!cleanMode && activePanel === 'library' && (
+          <div className="absolute top-0 left-0 bottom-0 z-10">
             <LibraryPanel
               onClose={() => setActivePanel(null)}
               onAddToCanvas={addToCanvas}
             />
-          )}
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'collections' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <BookOpen className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Collections coming soon</p>
-            </div>
-          )}
+        {!cleanMode && activePanel === 'collections' && (
+          <div className="absolute top-0 left-0 bottom-0 w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+            <BookOpen className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500">Collections coming soon</p>
+          </div>
+        )}
 
-          {!cleanMode && activePanel === 'projects' && (
+        {!cleanMode && activePanel === 'projects' && (
+          <div className="absolute top-0 left-0 bottom-0 z-10">
             <ProjectsPanel
               onClose={() => setActivePanel(null)}
               canvasElements={canvasElements}
               onLoadProject={setCanvasElements}
             />
-          )}
-
-          {!cleanMode && activePanel === 'settings' && (
-            <div className="w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
-              <Settings className="w-16 h-16 text-slate-300 mb-4" />
-              <p className="text-slate-500">Settings coming soon</p>
-            </div>
-          )}
-
-          <div className="flex-1 relative">
-            <Canvas
-              elements={canvasElements}
-              selectedElementIds={selectedElementIds}
-              onSelectElements={handleSelectElements}
-              onUpdateElement={updateElement}
-              onUpdateElements={(updates) => {
-                setCanvasElements(prevElements => {
-                  const updateMap = new Map(updates.map(u => [u.id, u]));
-                  return prevElements.map(el => {
-                    const update = updateMap.get(el.id);
-                    return update ? { ...el, ...update } : el;
-                  });
-                });
-              }}
-              showBbox={showBbox}
-              cleanMode={cleanMode}
-              onToggleCleanMode={() => toggleCleanMode()}
-              zoom={zoom}
-              showGrid={showGrid}
-              onExport={exportSvg}
-              onZoomChange={setZoom}
-            />
           </div>
-        </div>
+        )}
 
+        {!cleanMode && activePanel === 'settings' && (
+          <div className="absolute top-0 left-0 bottom-0 w-96 bg-white border-r border-slate-200 shadow-xl flex flex-col items-center justify-center z-10">
+            <Settings className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500">Settings coming soon</p>
+          </div>
+        )}
+
+        {/* Properties Panel - Bottom Overlay */}
         {!cleanMode && selectedElementIds.length > 0 && (
-          <div className="h-16 bg-white border-t border-slate-200 shadow-lg">
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 shadow-lg z-10">
             <PropertiesPanel
               elements={canvasElements}
               selectedElementIds={selectedElementIds}

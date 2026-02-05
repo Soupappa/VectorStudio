@@ -319,12 +319,88 @@ export default function Canvas({
     onZoomChange(newZoom);
   };
 
+  const renderRulers = () => {
+    if (cleanMode || !showGrid) return null;
+
+    const containerWidth = containerRef.current?.clientWidth || 0;
+    const containerHeight = containerRef.current?.clientHeight || 0;
+    const rulerStep = 200;
+    const marks: number[] = [];
+
+    for (let i = -2500; i <= 2500; i += rulerStep) {
+      marks.push(i);
+    }
+
+    return (
+      <>
+        {/* Top Ruler */}
+        <div className="absolute top-0 left-8 right-0 h-8 bg-white border-b border-slate-300 flex items-center overflow-hidden z-20">
+          <svg width={containerWidth} height="32" className="overflow-visible">
+            <g>
+              {marks.map(mark => {
+                const screenX = (mark * zoom + panX / zoom * zoom) + containerWidth / 2;
+                if (screenX < 0 || screenX > containerWidth) return null;
+                return (
+                  <g key={mark}>
+                    <line x1={screenX} y1={24} x2={screenX} y2={32} stroke="#64748b" strokeWidth="1" />
+                    <text
+                      x={screenX}
+                      y={18}
+                      fontSize="10"
+                      fill="#475569"
+                      textAnchor="middle"
+                      fontFamily="monospace"
+                    >
+                      {mark}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
+
+        {/* Left Ruler */}
+        <div className="absolute top-8 left-0 bottom-0 w-8 bg-white border-r border-slate-300 flex items-center overflow-hidden z-20">
+          <svg width="32" height={containerHeight} className="overflow-visible">
+            <g>
+              {marks.map(mark => {
+                const screenY = (mark * zoom + panY / zoom * zoom) + containerHeight / 2;
+                if (screenY < 0 || screenY > containerHeight) return null;
+                return (
+                  <g key={mark}>
+                    <line x1={24} y1={screenY} x2={32} y2={screenY} stroke="#64748b" strokeWidth="1" />
+                    <text
+                      x={18}
+                      y={screenY + 3}
+                      fontSize="10"
+                      fill="#475569"
+                      textAnchor="end"
+                      fontFamily="monospace"
+                    >
+                      {mark}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
+
+        {/* Corner Box */}
+        <div className="absolute top-0 left-0 w-8 h-8 bg-slate-100 border-r border-b border-slate-300 z-20" />
+      </>
+    );
+  };
+
   return (
     <div
       ref={containerRef}
       className="h-full relative bg-slate-200 overflow-hidden"
       onWheel={handleWheel}
     >
+      {renderRulers()}
+
       {showBbox && bbox && selectedElements.length === 1 && !cleanMode && (
         <div className="absolute bottom-4 left-4 bg-white border border-slate-300 rounded-lg p-3 shadow-lg z-10 space-y-2">
           <div className="flex items-center gap-2 mb-2">
@@ -343,9 +419,9 @@ export default function Canvas({
                 <span className="text-xs text-slate-600 w-16">Offset X:</span>
                 <input
                   type="range"
-                  min="-200"
-                  max="200"
-                  step="1"
+                  min="-1000"
+                  max="1000"
+                  step="5"
                   value={bboxOffsetX}
                   onChange={(e) => setBboxOffsetX(Number(e.target.value))}
                   className="w-24"
@@ -357,9 +433,9 @@ export default function Canvas({
                 <span className="text-xs text-slate-600 w-16">Offset Y:</span>
                 <input
                   type="range"
-                  min="-200"
-                  max="200"
-                  step="1"
+                  min="-1000"
+                  max="1000"
+                  step="5"
                   value={bboxOffsetY}
                   onChange={(e) => setBboxOffsetY(Number(e.target.value))}
                   className="w-24"
@@ -371,9 +447,9 @@ export default function Canvas({
                 <span className="text-xs text-slate-600 w-16">Scale X:</span>
                 <input
                   type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.05"
+                  min="0.1"
+                  max="10"
+                  step="0.1"
                   value={bboxScaleX}
                   onChange={(e) => setBboxScaleX(Number(e.target.value))}
                   className="w-24"
@@ -385,9 +461,9 @@ export default function Canvas({
                 <span className="text-xs text-slate-600 w-16">Scale Y:</span>
                 <input
                   type="range"
-                  min="0.5"
-                  max="2"
-                  step="0.05"
+                  min="0.1"
+                  max="10"
+                  step="0.1"
                   value={bboxScaleY}
                   onChange={(e) => setBboxScaleY(Number(e.target.value))}
                   className="w-24"
@@ -461,7 +537,7 @@ export default function Canvas({
       )}
 
       <div
-        className="absolute inset-0 overflow-hidden"
+        className={`absolute overflow-hidden ${showGrid && !cleanMode ? 'top-8 left-8 right-0 bottom-0' : 'inset-0'}`}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -480,12 +556,12 @@ export default function Canvas({
               <rect width="50" height="50" fill="#e5e7eb" />
               <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#ffffff" strokeWidth="1" strokeDasharray="3,3" />
             </pattern>
-            <pattern id="magentaGrid" width={100 * zoom} height={100 * zoom} patternUnits="userSpaceOnUse">
+            <pattern id="magentaGrid" width={200 * zoom} height={200 * zoom} patternUnits="userSpaceOnUse">
               <path
-                d={`M ${100 * zoom} 0 L 0 0 0 ${100 * zoom}`}
+                d={`M ${200 * zoom} 0 L 0 0 0 ${200 * zoom}`}
                 fill="none"
                 stroke="#e91e63"
-                strokeWidth={Math.max(1, zoom * 0.5)}
+                strokeWidth={Math.max(2, zoom * 1)}
               />
             </pattern>
           </defs>

@@ -189,7 +189,7 @@ export default function PropertiesPanel({
               max="360"
               value={displayElement.rotation}
               onChange={(e) => updateElementOrGroup({ rotation: Number(e.target.value) })}
-              className="tech-slider w-16 flex-shrink-0"
+              className="tech-slider w-24 flex-shrink-0"
             />
             <span className="text-xs text-slate-900 font-mono w-8">{Math.round(displayElement.rotation)}°</span>
           </div>
@@ -204,26 +204,19 @@ export default function PropertiesPanel({
               step="0.01"
               value={displayElement.opacity}
               onChange={(e) => updateElementOrGroup({ opacity: Number(e.target.value) })}
-              className="tech-slider w-16 flex-shrink-0"
+              className="tech-slider w-24 flex-shrink-0"
             />
             <span className="text-xs text-slate-900 font-mono w-8">{Math.round(displayElement.opacity * 100)}%</span>
           </div>
 
           <div className="h-6 w-px bg-slate-300" />
 
-          {/* Color */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-600">Color</span>
+          {/* Color, Flip H/V, Advanced - Grouped tightly */}
+          <div className="flex items-center gap-0.5">
             <ColorPicker
               value={displayElement.color || '#1e293b'}
               onChange={(color) => updateElementOrGroup({ color })}
             />
-          </div>
-
-          <div className="h-6 w-px bg-slate-300" />
-
-          {/* Flip H/V */}
-          <div className="flex items-center gap-1">
             <button
               onClick={() => updateElementOrGroup({ flipX: !displayElement.flipX })}
               className={`p-1 rounded border transition-colors ${
@@ -246,24 +239,22 @@ export default function PropertiesPanel({
             >
               <FlipVertical className="w-3 h-3" />
             </button>
+            <button
+              onClick={() => setShowAdvancedModal(!showAdvancedModal)}
+              className={`p-1 rounded border transition-colors ${
+                showAdvancedModal
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Advanced Options"
+            >
+              <Wand2 className="w-3 h-3" />
+            </button>
           </div>
-
-          {/* Advanced button */}
-          <button
-            onClick={() => setShowAdvancedModal(!showAdvancedModal)}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-              showAdvancedModal
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-            }`}
-            title="Advanced Options"
-          >
-            <Wand2 className="w-3 h-3" />
-          </button>
 
           {/* Advanced Modal */}
           {showAdvancedModal && (
-            <div className="absolute bottom-full left-1/4 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-4 min-w-80 z-50">
+            <div className="absolute bottom-full right-0 mb-2 bg-white border border-slate-200 rounded-lg shadow-xl p-4 min-w-80 z-50">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-slate-900">Advanced</h3>
                 <button
